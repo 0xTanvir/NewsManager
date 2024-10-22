@@ -1,0 +1,2 @@
+# NewsManager
+Manage news
