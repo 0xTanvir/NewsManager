@@ -7,6 +7,10 @@ setup:
 setup-dev: setup
 	. .venv/bin/activate && uv pip install -e ".[dev]"
 
+.PHONY: run
+run:
+	fastapi dev
+
 .PHONY: clean
 clean:
 	rm -rf .venv
