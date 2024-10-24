@@ -92,7 +92,6 @@ export default function Home() {
     sortDirection,
     selectedCategory,
     selectedSource,
-    toast,
   ]);
 
   useEffect(() => {
@@ -153,11 +152,11 @@ export default function Home() {
   };
 
   const handleOptimize = async (id: string) => {
-    toast("Optimize functionality not implemented yet");
+    toast("Optimize functionality not implemented yet:"+id);
   };
 
   const handleTranslate = async (id: string) => {
-    toast("Translation functionality not implemented yet");
+    toast("Translation functionality not implemented yet:"+id);
   };
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
