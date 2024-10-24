@@ -1,0 +1,12 @@
+{
+  "cSpell.words": [
+    "fastapi",
+    "prestart",
+    "psycopg",
+    "Pydantic",
+    "SQLALCHEMY",
+    "sqlmodel",
+    "TIMESTAMPTZ",
+    "VARCHAR"
+  ]
+}
