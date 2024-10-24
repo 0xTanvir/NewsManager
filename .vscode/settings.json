@@ -1,12 +1,15 @@
 {
   "cSpell.words": [
     "fastapi",
+    "mattn",
     "prestart",
     "psycopg",
     "Pydantic",
     "sonner",
     "SQLALCHEMY",
     "sqlmodel",
+    "syncer",
+    "Tanvir",
     "TIMESTAMPTZ",
     "VARCHAR"
   ]
