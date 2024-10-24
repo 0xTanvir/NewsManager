@@ -120,19 +120,31 @@ def bulk_create_news(
 def read_news(
     *,
     session: SessionDep,
-    limit: int = Query(100, ge=1),
+    limit: int = Query(20, ge=1),
     offset: int = Query(0, ge=0),
     query: Optional[str] = None,
     sort: Optional[str] = "published_at",
-    order: Optional[str] = "asc"
+    order: Optional[str] = "asc",
+    category: Optional[str] = None,   # New parameter for category
+    source_name: Optional[str] = None  # New parameter for source_name
 ) -> Any:
     """
-    Retrieve all news articles with optional filters.
+    Retrieve all news articles with optional filters for headline, category, and source_name.
     """
+    # Start building the base query
     statement = select(News)
 
+    # Filter by headline if 'query' is provided
     if query:
         statement = statement.where(News.headline.ilike(f"%{query}%"))
+
+    # Filter by category if provided
+    if category:
+        statement = statement.where(News.category == category)
+
+    # Filter by source_name if provided
+    if source_name:
+        statement = statement.where(News.source_name == source_name)
 
     # Ensure the sort field exists in the News model
     if sort not in News.__fields__:
@@ -141,25 +153,38 @@ def read_news(
             detail=f"Cannot sort by unknown field: {sort}"
         )
 
+    # Set the sort order
     sort_column = getattr(News, sort)
     if order.lower() == "desc":
         sort_column = sort_column.desc()
     else:
         sort_column = sort_column.asc()
 
+    # Apply sorting, offset, and limit to the query
     statement = statement.order_by(sort_column).offset(offset).limit(limit)
 
+    # Execute the query to get the news articles
     items = session.exec(statement).all()
 
+    # Prepare the count query
     count_statement = select(func.count()).select_from(News)
+
+    # Apply filters to the count query
     if query:
         count_statement = count_statement.where(News.headline.ilike(f"%{query}%"))
+    if category:
+        count_statement = count_statement.where(News.category == category)
+    if source_name:
+        count_statement = count_statement.where(News.source_name == source_name)
+
+    # Get the total count of articles matching the filters
     total_count = session.exec(count_statement).one()
 
+    # Return the filtered news articles and the total count
     return NewsList(data=items, count=total_count)
 
 
-@router.get("/{id}", response_model=NewsPublic)
+@router.get("/{id:path}", response_model=NewsPublic)
 def read_news_article(
     *,
     session: SessionDep,
@@ -183,7 +208,7 @@ def read_news_article(
     return news
 
 
-@router.put("/{id}", response_model=NewsPublic)
+@router.put("/{id:path}", response_model=NewsPublic)
 def update_news_article(
     *,
     session: SessionDep,
@@ -223,7 +248,7 @@ def update_news_article(
     return news
 
 
-@router.delete("/{id}", response_model=Message)
+@router.delete("/{id:path}", response_model=Message)
 def delete_news_article(
     *,
     session: SessionDep,
@@ -232,6 +257,7 @@ def delete_news_article(
     """
     Delete a news article by ID.
     """
+    print(f"id", id)
     if len(id) > 255:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
