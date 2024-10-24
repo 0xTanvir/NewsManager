@@ -4,6 +4,7 @@
     "prestart",
     "psycopg",
     "Pydantic",
+    "sonner",
     "SQLALCHEMY",
     "sqlmodel",
     "TIMESTAMPTZ",
