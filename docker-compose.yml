@@ -18,7 +18,7 @@ services:
     restart: always
     environment:
       PROJECT_NAME: News Manager
-      POSTGRES_SERVER: localhost
+      POSTGRES_SERVER: 194.238.28.227
       POSTGRES_PORT: 5432
       POSTGRES_DB: news_manager
       POSTGRES_USER: postgres
