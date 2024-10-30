@@ -34,8 +34,6 @@ import {
   Trash2,
   Zap,
   Languages,
-  Clock,
-  AlignLeft,
 } from "lucide-react";
 import {
   Tooltip,
@@ -43,7 +41,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { newsApi, type NewsArticle } from "@/services/newsApi";
 
@@ -161,17 +158,6 @@ export default function Home() {
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-  // Helper functions remain the same
-  const getWordCount = (text: string) => {
-    return text.split(/\s+/).filter((word) => word.length > 0).length;
-  };
-
-  const getReadingTime = (text: string) => {
-    const wordsPerMinute = 200;
-    const wordCount = getWordCount(text);
-    return Math.ceil(wordCount / wordsPerMinute);
-  };
-
   // The rest of your JSX remains largely the same, just handle loading state
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -285,22 +271,6 @@ export default function Home() {
                   <TableCell className="font-medium">
                     <div className="flex flex-col gap-2">
                       <span>{article.headline}</span>
-                      <div className="flex gap-2">
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          <AlignLeft className="w-3 h-3" />
-                          {getWordCount(article.story)}
-                        </Badge>
-                        <Badge
-                          variant="secondary"
-                          className="flex items-center gap-1"
-                        >
-                          <Clock className="w-3 h-3" />
-                          {getReadingTime(article.story)} min
-                        </Badge>
-                      </div>
                     </div>
                   </TableCell>
 
