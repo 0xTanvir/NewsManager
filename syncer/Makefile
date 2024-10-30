@@ -22,5 +22,6 @@ migrate-down: $(MIGRATE_BIN)
 build: clean
 	GOOS=darwin GOARCH=amd64 CGO_ENABLED=1 go build -o $(RELEASE_DIR)/$(BINARY_NAME)-darwin main.go
 	GOOS=windows GOARCH=amd64 CC=x86_64-w64-mingw32-gcc CGO_ENABLED=1 go build -o $(RELEASE_DIR)/$(BINARY_NAME)-windows.exe main.go
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o $(RELEASE_DIR)/$(BINARY_NAME)-linux main.go
 
 .PHONY: install run build clean migrate-up migrate-down

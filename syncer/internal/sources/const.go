@@ -1,11 +1,11 @@
 package sources
 
 const (
-	SOURCE_PROTHOMALO   = "prothomalo"
-	SOURCE_BBC          = "bbc"
-	SOURCE_REUTERS      = "reuters"
-	SOURCE_THE_GUARDIAN = "theguardian"
-	SOURCE_ALJAZEERA    = "aljazeera"
+	SOURCE_PROTHOMALO   = "Prothom Alo"
+	SOURCE_BBC          = "BBC"
+	SOURCE_REUTERS      = "Reuters"
+	SOURCE_THE_GUARDIAN = "The Guardian"
+	SOURCE_ALJAZEERA    = "Al Jazeera"
 
-	CATEGORY_WORLD = "world"
+	CATEGORY_WORLD = "World"
 )
