@@ -15,7 +15,7 @@ func (nr NewsResponse) toLinks() []string {
 	links := []string{}
 
 	for _, tab := range nr.Tabs {
-		if strings.Contains(tab.Heading, "Across") {
+		if !strings.Contains(tab.Heading, "Across") {
 			for _, trail := range tab.Trails {
 				l := strings.ReplaceAll(trail.URL, "https://www.theguardian.com", "https://api.nextgen.guardianapps.co.uk")
 				l += ".json"

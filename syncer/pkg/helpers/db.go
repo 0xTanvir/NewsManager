@@ -21,6 +21,7 @@ func GetDbPool() *pg.Repositories {
 		User:     "postgres",
 		Password: "docker",
 		Address:  "localhost:5432",
+		// Address:  "194.238.28.227:5432",
 		Database: "news_manager",
 	}
 	dbPool := pg.GetInstance(dbConfig)
