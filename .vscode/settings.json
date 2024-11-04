@@ -8,6 +8,7 @@
     "sonner",
     "SQLALCHEMY",
     "sqlmodel",
+    "supabase",
     "syncer",
     "Tanvir",
     "TIMESTAMPTZ",

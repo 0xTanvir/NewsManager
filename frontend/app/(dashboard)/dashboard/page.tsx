@@ -27,10 +27,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
   ChevronLeft,
   ChevronRight,
   Search,
-  Edit,
+  FileText,
   Trash2,
   Zap,
   Languages,
@@ -41,10 +48,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { toast } from "sonner";
 import { newsApi, type NewsArticle } from "@/services/newsApi";
 
-export default function Home() {
+export default function DashboardPage() {
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -58,8 +67,17 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedSource, setSelectedSource] = useState<string>("All");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(
+    null
+  );
 
   const itemsPerPage = 20;
+
+  const handleShowSummary = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    setIsSummaryOpen(true);
+  };
 
   const fetchNews = useCallback(async () => {
     try {
@@ -149,11 +167,11 @@ export default function Home() {
   };
 
   const handleOptimize = async (id: string) => {
-    toast("Optimize functionality not implemented yet:"+id);
+    toast("Optimize functionality not implemented yet:" + id);
   };
 
   const handleTranslate = async (id: string) => {
-    toast("Translation functionality not implemented yet:"+id);
+    toast("Translation functionality not implemented yet:" + id);
   };
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -238,7 +256,7 @@ export default function Home() {
                 className="cursor-pointer"
                 onClick={() => handleSort("published_at")}
               >
-                Published At{" "}
+                Posted At{" "}
                 {sortColumn === "published_at" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
@@ -287,13 +305,13 @@ export default function Home() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleEdit(article)}
+                              onClick={() => handleShowSummary(article)}
                             >
-                              <Edit className="h-4 w-4" />
+                              <FileText className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>Edit</p>
+                            <p>Summary</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -353,6 +371,113 @@ export default function Home() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Summary Drawer */}
+      <Sheet open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl overflow-y-auto"
+        >
+          <SheetHeader className="mb-6">
+            <SheetTitle>Article Summary</SheetTitle>
+            <SheetDescription>
+              Quick overview and key points of the article
+            </SheetDescription>
+          </SheetHeader>
+
+          {selectedArticle && (
+            <div className="space-y-6">
+              {/* Article Image */}
+              <Card>
+                <CardContent className="p-0">
+                  <AspectRatio ratio={16 / 9}>
+                    <img
+                      src={selectedArticle.image_link}
+                      alt={selectedArticle.headline}
+                      className="object-cover w-full h-full rounded-t-lg"
+                    />
+                  </AspectRatio>
+                  <div className="p-4">
+                    <h3 className="font-semibold mb-2">
+                      {selectedArticle.headline}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {selectedArticle.meta_description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Article Details */}
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  Source & Date
+                </Label>
+                <p className="text-sm">
+                  {selectedArticle.source_name} •{" "}
+                  {new Date(selectedArticle.published_at).toLocaleString()}
+                </p>
+              </div>
+
+              {/* Summary Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Summary</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedArticle.story}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Bullet Points Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Key Points</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>
+                      This article can attract attention due to its coverage of{" "}
+                      {selectedArticle.category}
+                    </li>
+                    <li>
+                      The story is timely and relevant to current events in{" "}
+                      {selectedArticle.category}
+                    </li>
+                    <li>
+                      It provides valuable insights into{" "}
+                      {selectedArticle.headline.toLowerCase()}
+                    </li>
+                    <li>
+                      The coverage includes perspectives from{" "}
+                      {selectedArticle.source_name}
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Metadata */}
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  Category
+                </Label>
+                <p className="text-sm">{selectedArticle.category}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  Keywords
+                </Label>
+                <p className="text-sm">
+                  {selectedArticle.meta_keywords || "No keywords available"}
+                </p>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Pagination section updated with total count from API */}
       <div className="flex justify-between items-center mt-4">
