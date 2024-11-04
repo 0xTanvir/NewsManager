@@ -29,7 +29,7 @@ export default function AboutPage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
-              We believe staying informed shouldn't mean visiting dozens of
+              We believe staying informed shouldn&apos;t mean visiting dozens of
               different news websites. Our mission is to simplify your daily
               news gathering by carefully curating and aggregating news from
               over 20 trusted sources, saving you valuable time and effort.

@@ -43,21 +43,23 @@ export const updateSession = async (request: NextRequest) => {
     }
 
     // Redirect authenticated users from auth pages
+    // Exclude reset-password page from this check
     if (
       user &&
       (request.nextUrl.pathname === "/sign-in" ||
         request.nextUrl.pathname === "/sign-up" ||
-        request.nextUrl.pathname === "/forgot-password")
+        request.nextUrl.pathname === "/forgot-password") &&
+      !request.nextUrl.pathname.startsWith("/reset-password")
     ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Allow access to reset-password from auth callback
+    // Allow access to reset-password from auth callback or with code
     if (
       request.nextUrl.pathname === "/reset-password" &&
       !request.nextUrl.searchParams.has("code")
     ) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+      return NextResponse.redirect(new URL("/forgot-password", request.url));
     }
 
     // If user directly hits root, redirect appropriately

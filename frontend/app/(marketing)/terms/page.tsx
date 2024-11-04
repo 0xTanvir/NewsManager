@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -34,10 +33,11 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Welcome to News Manager ("we," "our," or "us"). By accessing or
-                using our news aggregation service, you agree to be bound by
-                these Terms and Conditions ("Terms"). If you disagree with any
-                part of these terms, please do not use our service.
+                Welcome to News Manager (&quot;we&quot;, &quot;our&quot;, or
+                &quot;us&quot;). By accessing or using our news aggregation
+                service, you agree to be bound by these Terms and Conditions
+                (&quot;Terms&quot;). If you disagree with any part of these
+                terms, please do not use our service.
               </p>
             </CardContent>
           </Card>

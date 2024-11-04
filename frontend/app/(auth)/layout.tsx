@@ -21,7 +21,7 @@ export default function AuthLayout({
           <blockquote className="space-y-2">
             <p className="text-lg">
               &ldquo;This news manager platform has completely transformed how
-              we handle our content workflow. It's incredibly intuitive and
+              we handle our content workflow. It&apos;s incredibly intuitive and
               efficient.&rdquo;
             </p>
             <footer className="text-sm">Sofia Davis</footer>

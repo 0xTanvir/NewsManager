@@ -78,7 +78,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   const origin = (await headers()).get("origin");
 
   if (!email) {
-    return encodedRedirect("error", "/forgot-password", "Email is required");
+    throw new Error("Email is required");
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -87,18 +87,11 @@ export const forgotPasswordAction = async (formData: FormData) => {
 
   if (error) {
     console.error("Reset password error:", error);
-    return encodedRedirect(
-      "error",
-      "/forgot-password",
-      "Could not reset password"
-    );
+    throw new Error("Could not reset password");
   }
 
-  return encodedRedirect(
-    "success",
-    "/forgot-password",
-    "Check your email for a password reset link."
-  );
+  // Don't redirect, just return success
+  return { success: true };
 };
 
 export const resetPasswordAction = async (formData: FormData) => {
@@ -112,38 +105,56 @@ export const resetPasswordAction = async (formData: FormData) => {
     // Validate using shared schema
     resetPasswordSchema.parse({ password, confirmPassword });
 
-    await supabase.auth.exchangeCodeForSession(code);
+    // First exchange the code for a session
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(
+      code
+    );
+    if (exchangeError) {
+      return {
+        error:
+          "Invalid or expired reset code. Please request a new reset link.",
+      };
+    }
 
     // Update the user's password
     const { error: updateError } = await supabase.auth.updateUser({
       password: password,
     });
 
-    if (updateError) throw updateError;
+    if (updateError) {
+      // Handle same password error specifically
+      if (updateError.message.includes("different from the old password")) {
+        return {
+          error: "New password must be different from your current password",
+        };
+      }
 
-    // Sign out from other sessions for security
-    await supabase.auth.signOut({ scope: "others" });
+      // Handle other specific Supabase errors
+      if (updateError.status === 422) {
+        return {
+          error: "Invalid password format. Please try a different password.",
+        };
+      }
 
-    return encodedRedirect(
-      "success",
-      "/reset-password",
-      "Password updated successfully. Redirecting to sign in..."
-    );
+      // Generic error fallback
+      return { error: "Failed to reset password. Please try again." };
+    }
+
+    // Sign out from all sessions for security
+    await supabase.auth.signOut();
+
+    return {
+      success: true,
+      message:
+        "Password updated successfully. Please sign in with your new password.",
+    };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return encodedRedirect(
-        "error",
-        "/reset-password",
-        error.errors[0].message
-      );
+      return { error: error.errors[0].message };
     }
 
     console.error("Reset password error:", error);
-    return encodedRedirect(
-      "error",
-      "/reset-password",
-      "Failed to reset password. Please try again."
-    );
+    return { error: "An unexpected error occurred. Please try again." };
   }
 };
 

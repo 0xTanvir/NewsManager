@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,19 +15,20 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
-import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { resetPasswordAction } from "@/services/actions";
 import { toast } from "sonner";
 import { resetPasswordSchema } from "@/lib/validations/auth";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [success, setSuccess] = useState<boolean>(false);
 
-  // Get reset code, status and message from URL
+  // Get reset code from URL
   const code = searchParams.get("code");
   const status = searchParams.get("status");
   const message = searchParams.get("message");
@@ -34,16 +36,23 @@ export default function ResetPasswordPage() {
   // Handle status messages
   useEffect(() => {
     if (status && message) {
+      const decodedMessage = decodeURIComponent(message);
       if (status === "error") {
-        toast.error(decodeURIComponent(message));
+        toast.error(decodedMessage);
       } else if (status === "success") {
-        toast.success(decodeURIComponent(message));
-        if (message.includes("Password updated")) {
+        setSuccess(true);
+        toast.success(decodedMessage);
+        if (decodedMessage.includes("Password updated")) {
           setTimeout(() => {
             router.push("/sign-in");
           }, 2000);
         }
       }
+      // Clean up URL params
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("status");
+      newUrl.searchParams.delete("message");
+      router.replace(newUrl.pathname + newUrl.search);
     }
   }, [status, message, router]);
 
@@ -54,6 +63,14 @@ export default function ResetPasswordPage() {
       router.push("/forgot-password");
     }
   }, [code, router]);
+
+  // Handle the "Request new reset link" click
+  const handleRequestNewLink = async () => {
+    // Sign out first to clear any existing session
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/forgot-password");
+  };
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -76,22 +93,21 @@ export default function ResetPasswordPage() {
       // Submit the form
       const result = await resetPasswordAction(formData);
 
-      // If the action returns a response (it might redirect instead)
-      if (result) {
-        const url = new URL(result);
-        const status = url.searchParams.get("status");
-        const message = url.searchParams.get("message");
-
-        if (status === "error" && message) {
-          toast.error(decodeURIComponent(message));
-        }
+      if ("error" in result && result.error) {
+        setValidationErrors([result.error]);
+        toast.error(result.error);
+      } else if ("success" in result && result.success) {
+        setSuccess(true);
+        toast.success(result.message);
+        // Redirect to sign-in after successful password reset
+        setTimeout(() => {
+          router.push("/sign-in");
+        }, 2000);
       }
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        setValidationErrors(error.errors.map((err) => err.message));
-      } else {
-        toast.error("An error occurred while resetting your password");
-      }
+      console.error("Form submission error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+      setValidationErrors(["An unexpected error occurred. Please try again."]);
     } finally {
       setIsLoading(false);
     }
@@ -99,6 +115,32 @@ export default function ResetPasswordPage() {
 
   if (!code) {
     return null; // Don't render the form if there's no reset code
+  }
+
+  if (success) {
+    return (
+      <Card>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">Password Reset Successful</CardTitle>
+          <CardDescription>
+            Your password has been updated successfully. You will be redirected
+            to the sign in page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Alert className="border-green-500">
+            <AlertDescription>
+              Password updated successfully. Redirecting to sign in page...
+            </AlertDescription>
+          </Alert>
+        </CardContent>
+        <CardFooter className="justify-center">
+          <Button variant="ghost" onClick={() => router.push("/sign-in")}>
+            Go to sign in
+          </Button>
+        </CardFooter>
+      </Card>
+    );
   }
 
   return (
@@ -166,12 +208,49 @@ export default function ResetPasswordPage() {
         </Button>
         <Button
           variant="link"
-          onClick={() => router.push("/forgot-password")}
+          onClick={handleRequestNewLink}
           disabled={isLoading}
         >
           Request new reset link
         </Button>
       </CardFooter>
     </Card>
+  );
+}
+
+// Loading component using Skeleton
+function ResetPasswordLoading() {
+  return (
+    <Card>
+      <CardHeader className="space-y-1">
+        <Skeleton className="h-8 w-[150px]" />
+        <Skeleton className="h-4 w-[200px]" />
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Skeleton className="h-4 w-[100px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="grid gap-2">
+            <Skeleton className="h-4 w-[150px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </CardContent>
+      <CardFooter className="flex justify-between">
+        <Skeleton className="h-10 w-[120px]" />
+        <Skeleton className="h-10 w-[150px]" />
+      </CardFooter>
+    </Card>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordLoading />}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
