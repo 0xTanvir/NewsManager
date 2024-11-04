@@ -35,7 +35,7 @@ class ApiError extends Error {
 }
 
 // TODO: Replace with actual API URL from environment variables
-const baseUrl = "/backend-api";
+const baseUrl = "http://localhost:8000";
 
 export const newsApi = {
   // Helper function to handle API responses
@@ -119,7 +119,7 @@ export const newsApi = {
   async bulkCreateNews(
     newsList: Partial<NewsArticle>[]
   ): Promise<NewsArticle[]> {
-    const response = await fetch("${baseUrl}/api/v1/news/bulk", {
+    const response = await fetch(`${baseUrl}/api/v1/news/bulk`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
