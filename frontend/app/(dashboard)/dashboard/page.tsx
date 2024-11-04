@@ -11,14 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -61,9 +54,6 @@ export default function DashboardPage() {
   const [sortColumn, setSortColumn] =
     useState<keyof NewsArticle>("published_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(
-    null
-  );
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedSource, setSelectedSource] = useState<string>("All");
   const [isLoading, setIsLoading] = useState(false);
@@ -145,23 +135,6 @@ export default function DashboardPage() {
       console.log(error);
       toast.error(
         error instanceof Error ? error.message : "Failed to delete news article"
-      );
-    }
-  };
-
-  const handleEdit = (article: NewsArticle) => {
-    setEditingArticle(article);
-  };
-
-  const handleUpdate = async (updatedArticle: NewsArticle) => {
-    try {
-      await newsApi.updateNews(updatedArticle.id, updatedArticle);
-      toast.success("News article updated successfully");
-      fetchNews();
-      setEditingArticle(null);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update news article"
       );
     }
   };
@@ -505,73 +478,6 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
-
-      {/* Edit dialog remains the same */}
-      {editingArticle && (
-        <Dialog
-          open={!!editingArticle}
-          onOpenChange={() => setEditingArticle(null)}
-        >
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Edit News Article</DialogTitle>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="headline" className="text-right">
-                  Headline
-                </Label>
-                <Input
-                  id="headline"
-                  value={editingArticle.headline}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      headline: e.target.value,
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category
-                </Label>
-                <Input
-                  id="category"
-                  value={editingArticle.category}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      category: e.target.value,
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="story" className="text-right">
-                  Story
-                </Label>
-                <Textarea
-                  id="story"
-                  value={editingArticle.story}
-                  onChange={(e) =>
-                    setEditingArticle({
-                      ...editingArticle,
-                      story: e.target.value,
-                    })
-                  }
-                  className="col-span-3"
-                />
-              </div>
-            </div>
-            <Button onClick={() => handleUpdate(editingArticle)}>
-              Save Changes
-            </Button>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 }

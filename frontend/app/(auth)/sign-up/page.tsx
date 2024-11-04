@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Icons } from "@/components/ui/icons";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import {
   InputOTP,
@@ -32,32 +33,75 @@ import {
 import { toast } from "sonner";
 import { z } from "zod";
 
-export default function SignUpPage() {
-  const router = useRouter();
+// Loading state components
+function SignUpLoading() {
+  return (
+    <Card>
+      <CardHeader className="space-y-1">
+        <Skeleton className="h-8 w-[200px]" />
+        <Skeleton className="h-4 w-[300px]" />
+      </CardHeader>
+      <CardContent className="grid gap-4">
+        <div className="grid gap-2">
+          <div className="grid gap-1">
+            <Skeleton className="h-4 w-[80px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="grid gap-1">
+            <Skeleton className="h-4 w-[80px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="grid gap-1">
+            <Skeleton className="h-4 w-[80px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="grid gap-1">
+            <Skeleton className="h-4 w-[120px]" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <Skeleton className="h-10 w-full" />
+        </div>
+        <div className="relative py-4">
+          <div className="absolute inset-0 flex items-center">
+            <Skeleton className="h-[1px] w-full" />
+          </div>
+          <div className="relative flex justify-center">
+            <Skeleton className="h-4 w-[120px]" />
+          </div>
+        </div>
+        <Skeleton className="h-10 w-full" />
+      </CardContent>
+      <CardFooter>
+        <Skeleton className="h-4 w-[250px]" />
+      </CardFooter>
+    </Card>
+  );
+}
+
+// Client Components
+function SignUpFormWrapper() {
   const searchParams = useSearchParams();
+  return (
+    <SignUpFormContent
+      verify={searchParams.get("verify")}
+      email={searchParams.get("email")}
+    />
+  );
+}
+
+function SignUpFormContent({
+  verify,
+  email,
+}: {
+  verify: string | null;
+  email: string | null;
+}) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [otp, setOtp] = useState<string>("");
   const [resendDisabled, setResendDisabled] = useState(false);
   const [resendCountdown, setResendCountdown] = useState(0);
-
-  const verify = searchParams.get("verify");
-  const email = searchParams.get("email");
-
-  // Get status and message from URL if they exist
-  const status = searchParams.get("status");
-  const message = searchParams.get("message");
-
-  // useEffect for status messages
-  useEffect(() => {
-    if (status && message) {
-      if (status === "error") {
-        toast.error(decodeURIComponent(message));
-      } else if (status === "success") {
-        toast.success(decodeURIComponent(message));
-      }
-    }
-  }, [status, message]);
 
   // Separate useEffect for resend countdown
   useEffect(() => {
@@ -93,7 +137,6 @@ export default function SignUpPage() {
       if (result.error) {
         setValidationErrors([result.error]);
       } else if (result.success) {
-        // Use router.push instead of server-side redirect
         router.push(
           `/sign-up?verify=true&email=${encodeURIComponent(result.email)}`
         );
@@ -113,7 +156,7 @@ export default function SignUpPage() {
     if (!email || resendDisabled) return;
 
     setResendDisabled(true);
-    setResendCountdown(60); // 60 seconds cool down
+    setResendCountdown(60);
 
     const result = await resendOTPAction(email);
 
@@ -130,8 +173,8 @@ export default function SignUpPage() {
     setValidationErrors([]);
 
     const formData = new FormData(event.currentTarget);
-    formData.set("email", email || ""); // Add email to form data
-    formData.set("otp", otp); // Add OTP to form data
+    formData.set("email", email || "");
+    formData.set("otp", otp);
 
     try {
       const result = await verifyOTPAction(formData);
@@ -143,7 +186,11 @@ export default function SignUpPage() {
         router.push("/dashboard");
       }
     } catch (error) {
-      setValidationErrors(["Failed to verify code. Please try again."]);
+      setValidationErrors([
+        error instanceof Error
+          ? error.message
+          : "Failed to verify code. Please try again.",
+      ]);
     } finally {
       setIsLoading(false);
     }
@@ -307,7 +354,11 @@ export default function SignUpPage() {
               setIsLoading(true);
               await signInWithGoogleAction();
             } catch (error) {
-              toast.error("An error occurred during Google sign in");
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : "An error occurred during Google sign in"
+              );
               setIsLoading(false);
             }
           }}
@@ -332,5 +383,14 @@ export default function SignUpPage() {
         </p>
       </CardFooter>
     </Card>
+  );
+}
+
+// Main component
+export default function SignUpPage() {
+  return (
+    <Suspense fallback={<SignUpLoading />}>
+      <SignUpFormWrapper />
+    </Suspense>
   );
 }
