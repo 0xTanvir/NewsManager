@@ -1,6 +1,5 @@
-// components/Header.tsx
 import Link from "next/link";
-import { Newspaper } from "lucide-react";
+import Image from "next/image";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { createClient } from "@/utils/supabase/server";
 import { UserNav } from "./UserNav";
@@ -19,7 +18,13 @@ export default async function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2">
-          <Newspaper className="h-6 w-6" />
+          <Image
+            src="/images/logos/ypegion-24x24.svg"
+            alt="YPigeon Logo"
+            width={24}
+            height={24}
+            className="dark:invert"
+          />
           <span className="font-bold text-lg">YPigeon</span>
         </Link>
 

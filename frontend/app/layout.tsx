@@ -18,7 +18,7 @@ const ubuntuMono = localFont({
 
 export const metadata: Metadata = {
   title: "YPigeon",
-  description: "YPigeon",
+  description: "Cut Costs, Not Coverage.",
 };
 
 export default function RootLayout({
