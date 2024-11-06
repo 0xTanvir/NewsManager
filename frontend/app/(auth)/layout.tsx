@@ -1,6 +1,6 @@
 // app/(auth)/layout.tsx
 import Link from "next/link";
-import { Newspaper } from "lucide-react";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -13,18 +13,22 @@ export default function AuthLayout({
         <div className="absolute inset-0 bg-zinc-900" />
         <div className="relative z-20 flex items-center text-lg font-medium">
           <Link href="/" className="flex items-center space-x-2">
-            <Newspaper className="h-6 w-6" />
+            <Image
+              src="/images/logos/ypegion-24x24.svg"
+              alt="YPigeon Logo"
+              width={24}
+              height={24}
+              className="dark:invert"
+            />
             <span>YPigeon</span>
           </Link>
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;This YPigeon platform has completely transformed how we
-              handle our content workflow. It&apos;s incredibly intuitive and
-              efficient.&rdquo;
+              Where all your news comes together, turning hours of search into
+              moments.
             </p>
-            <footer className="text-sm">Sofia Davis</footer>
           </blockquote>
         </div>
       </div>
@@ -32,7 +36,13 @@ export default function AuthLayout({
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="lg:hidden flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
-              <Newspaper className="h-6 w-6" />
+              <Image
+                src="/images/logos/ypegion-24x24.svg"
+                alt="YPigeon Logo"
+                width={24}
+                height={24}
+                className="dark:invert"
+              />
               <span className="font-bold text-lg">YPigeon</span>
             </Link>
           </div>

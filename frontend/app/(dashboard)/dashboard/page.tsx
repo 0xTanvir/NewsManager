@@ -152,7 +152,7 @@ export default function DashboardPage() {
   // The rest of your JSX remains largely the same, just handle loading state
   return (
     <div className="container mx-auto p-6 max-w-7xl">
-      <h1 className="text-3xl font-bold mb-6">News Management Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-grow">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />

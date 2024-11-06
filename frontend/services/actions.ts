@@ -170,15 +170,17 @@ export const signInWithGoogleAction = async () => {
         access_type: "offline",
         prompt: "consent",
       },
+      scopes: "email profile",
+      skipBrowserRedirect: false,
     },
   });
 
   if (error) {
     console.error("Supabase OAuth error:", error);
-    redirect("/error");
+    return redirect("/sign-in?error=" + encodeURIComponent(error.message));
   }
 
-  redirect(data.url);
+  return redirect(data.url);
 };
 
 export const signOutAction = async () => {
