@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p>
-            &copy; {new Date().getFullYear()} News Management Dashboard. All
+            &copy; {new Date().getFullYear()}, YPigeon by PassLimits. All
             rights reserved.
           </p>
           <nav className="mt-4 md:mt-0">

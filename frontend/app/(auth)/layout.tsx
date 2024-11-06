@@ -14,14 +14,14 @@ export default function AuthLayout({
         <div className="relative z-20 flex items-center text-lg font-medium">
           <Link href="/" className="flex items-center space-x-2">
             <Newspaper className="h-6 w-6" />
-            <span>News Manager</span>
+            <span>YPigeon</span>
           </Link>
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              &ldquo;This news manager platform has completely transformed how
-              we handle our content workflow. It&apos;s incredibly intuitive and
+              &ldquo;This YPigeon platform has completely transformed how we
+              handle our content workflow. It&apos;s incredibly intuitive and
               efficient.&rdquo;
             </p>
             <footer className="text-sm">Sofia Davis</footer>
@@ -33,7 +33,7 @@ export default function AuthLayout({
           <div className="lg:hidden flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
               <Newspaper className="h-6 w-6" />
-              <span className="font-bold text-lg">News Manager</span>
+              <span className="font-bold text-lg">YPigeon</span>
             </Link>
           </div>
           {children}
