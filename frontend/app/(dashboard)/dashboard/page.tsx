@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,7 +31,6 @@ import {
   ChevronRight,
   Search,
   FileText,
-  Trash2,
   Zap,
   Languages,
 } from "lucide-react";
@@ -44,7 +43,9 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { toast } from "sonner";
-import { newsApi, type NewsArticle } from "@/services/newsApi";
+import { type NewsArticle } from "@/types/news";
+import { getNews } from "./actions";
+import RelativeTime from "@/components/RelativeTime";
 
 export default function DashboardPage() {
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
@@ -54,8 +55,9 @@ export default function DashboardPage() {
   const [sortColumn, setSortColumn] =
     useState<keyof NewsArticle>("published_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [selectedSource, setSelectedSource] = useState<string>("All");
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>("Categories");
+  const [selectedSource, setSelectedSource] = useState<string>("Sources");
   const [isLoading, setIsLoading] = useState(false);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(
@@ -72,7 +74,7 @@ export default function DashboardPage() {
   const fetchNews = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await newsApi.getNews({
+      const response = await getNews({
         limit: itemsPerPage,
         offset: (currentPage - 1) * itemsPerPage,
         query: searchTerm,
@@ -122,22 +124,22 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this article?")) {
-      return;
-    }
+  // const handleDelete = async (id: string) => {
+  //   if (!window.confirm("Are you sure you want to delete this article?")) {
+  //     return;
+  //   }
 
-    try {
-      await newsApi.deleteNews(id);
-      toast.success("News article deleted successfully");
-      fetchNews();
-    } catch (error) {
-      console.log(error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete news article"
-      );
-    }
-  };
+  //   try {
+  //     await deleteNews(id);
+  //     toast.success("News article deleted successfully");
+  //     fetchNews();
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error(
+  //       error instanceof Error ? error.message : "Failed to delete news article"
+  //     );
+  //   }
+  // };
 
   const handleOptimize = async (id: string) => {
     toast("Optimize functionality not implemented yet:" + id);
@@ -169,7 +171,7 @@ export default function DashboardPage() {
           </SelectTrigger>
           <SelectContent>
             {[
-              "All",
+              "Categories",
               ...new Set(newsArticles.map((article) => article.category)),
             ].map((category) => (
               <SelectItem key={category} value={category}>
@@ -184,7 +186,7 @@ export default function DashboardPage() {
           </SelectTrigger>
           <SelectContent>
             {[
-              "All",
+              "Sources",
               ...new Set(newsArticles.map((article) => article.source_name)),
             ].map((source) => (
               <SelectItem key={source} value={source}>
@@ -200,9 +202,9 @@ export default function DashboardPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Image</TableHead>
+              <TableHead className="w-[100px] text-center">Image</TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer text-center"
                 onClick={() => handleSort("headline")}
               >
                 Headline{" "}
@@ -210,7 +212,7 @@ export default function DashboardPage() {
                   (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer text-center"
                 onClick={() => handleSort("category")}
               >
                 Category{" "}
@@ -218,7 +220,7 @@ export default function DashboardPage() {
                   (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer text-center"
                 onClick={() => handleSort("source_name")}
               >
                 Source{" "}
@@ -226,14 +228,14 @@ export default function DashboardPage() {
                   (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
               <TableHead
-                className="cursor-pointer"
+                className="cursor-pointer text-center"
                 onClick={() => handleSort("published_at")}
               >
                 Posted At{" "}
                 {sortColumn === "published_at" &&
                   (sortDirection === "asc" ? "↑" : "↓")}
               </TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -268,7 +270,7 @@ export default function DashboardPage() {
                   <TableCell>{article.category}</TableCell>
                   <TableCell>{article.source_name}</TableCell>
                   <TableCell>
-                    {new Date(article.published_at).toLocaleString()}
+                    <RelativeTime date={article.published_at} />
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
@@ -285,22 +287,6 @@ export default function DashboardPage() {
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>Summary</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDelete(article.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete</p>
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -388,7 +374,7 @@ export default function DashboardPage() {
                 </Label>
                 <p className="text-sm">
                   {selectedArticle.source_name} •{" "}
-                  {new Date(selectedArticle.published_at).toLocaleString()}
+                  <RelativeTime date={selectedArticle.published_at} />
                 </p>
               </div>
 

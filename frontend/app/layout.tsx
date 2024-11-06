@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from "next";
 import { Toaster } from "@/components/ui/sonner";
 import localFont from "next/font/local";
@@ -17,7 +16,7 @@ const ubuntuMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "YPigeon",
+  title: "YPigeon | Cut Costs, Not Coverage",
   description: "Cut Costs, Not Coverage.",
 };
 
