@@ -1,5 +1,5 @@
-import { Mail, Phone, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Mail } from "lucide-react";
+import ContactButton from "@/components/ContactButton";
 import {
   Card,
   CardContent,
@@ -99,7 +99,7 @@ export default function PrivacyPage() {
             <div className="space-y-2">
               <h3 className="font-semibold">2.2 Usage Limitations</h3>
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                <li>Maximum of 500 article accesses per day</li>
+                <li>Maximum of 100 article accesses per day</li>
                 <li>Content must be independently verified before use</li>
                 <li>
                   Direct republishing of our aggregated content is prohibited
@@ -233,15 +233,7 @@ export default function PrivacyPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Mail className="h-4 w-4" />
-                <span>privacy@newsmanager.com</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                <span>+1 (555) 123-4567</span>
-              </div>
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>123 Privacy Street, Security City, ST 12345</span>
+                <span>support@ypigeon.com</span>
               </div>
             </div>
           </CardContent>
@@ -262,10 +254,7 @@ export default function PrivacyPage() {
 
         {/* Contact Button */}
         <section className="text-center space-y-6 py-8">
-          <Button className="gap-2">
-            <Mail className="h-4 w-4" />
-            Contact Us About Privacy
-          </Button>
+          <ContactButton variant="privacy" />
         </section>
       </div>
     </div>

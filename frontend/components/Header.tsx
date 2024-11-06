@@ -20,7 +20,7 @@ export default async function Header() {
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2">
           <Newspaper className="h-6 w-6" />
-          <span className="font-bold text-lg">News Manager</span>
+          <span className="font-bold text-lg">YPigeon</span>
         </Link>
 
         <nav className="flex items-center space-x-4">
@@ -32,7 +32,7 @@ export default async function Header() {
                 variant="default"
                 className="font-normal pointer-events-none"
               >
-                Please update .env.local file with anon key and url
+                Please update your configuration
               </Badge>
               <div className="flex gap-2">
                 <Button

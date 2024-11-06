@@ -1,11 +1,5 @@
-import { Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import ContactButton from "@/components/ContactButton";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 export default function TermsPage() {
@@ -33,7 +27,7 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Welcome to News Manager (&quot;we&quot;, &quot;our&quot;, or
+                Welcome to YPigeon (&quot;we&quot;, &quot;our&quot;, or
                 &quot;us&quot;). By accessing or using our news aggregation
                 service, you agree to be bound by these Terms and Conditions
                 (&quot;Terms&quot;). If you disagree with any part of these
@@ -49,7 +43,7 @@ export default function TermsPage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                News Manager is a news aggregation platform that compiles and
+                YPigeon is a news aggregation platform that compiles and
                 presents news content from various sources for the convenience
                 of journalists and media professionals.
               </p>
@@ -267,10 +261,7 @@ export default function TermsPage() {
 
         {/* Contact Section */}
         <section className="text-center space-y-6 py-8">
-          <Button className="gap-2">
-            <Mail className="h-4 w-4" />
-            Contact Us About These Terms
-          </Button>
+          <ContactButton variant="terms" />
         </section>
       </div>
     </div>

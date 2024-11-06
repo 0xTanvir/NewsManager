@@ -1,5 +1,4 @@
-import { Mail } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import ContactButton from "@/components/ContactButton";
 import {
   Card,
   CardContent,
@@ -16,9 +15,9 @@ export default function AboutPage() {
         <section className="text-center space-y-4">
           <h1 className="text-4xl font-bold tracking-tight">About Us</h1>
           <p className="text-xl text-muted-foreground">
-            Welcome to News Manager, where we streamline your news consumption
-            by bringing together the most important stories from across the web
-            in one convenient location.
+            Welcome to YPigeon, where we streamline your news consumption by
+            bringing together the most important stories from across the web in
+            one convenient location.
           </p>
         </section>
 
@@ -45,7 +44,7 @@ export default function AboutPage() {
               <CardHeader>
                 <CardTitle>Comprehensive Coverage</CardTitle>
                 <CardDescription>
-                  Access news from more than 20 leading news websites through a
+                  Access news from more than 100 leading news websites through a
                   single platform
                 </CardDescription>
               </CardHeader>
@@ -130,15 +129,12 @@ export default function AboutPage() {
             </h2>
             <p className="text-muted-foreground">
               Join thousands of journalists and news readers who have simplified
-              their news gathering process with News Manager. Experience the
+              their news gathering process with YPigeon. Experience the
               convenience of accessing comprehensive news coverage through a
               single destination.
             </p>
           </div>
-          <Button className="gap-2">
-            <Mail className="h-4 w-4" />
-            Contact Us
-          </Button>
+          <ContactButton variant="about" />
         </section>
       </div>
     </div>

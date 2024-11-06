@@ -5,20 +5,20 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+// Configure Ubuntu font locally
+const ubuntu = localFont({
+  src: "./fonts/Ubuntu-Light.woff2",
+  variable: "--font-ubuntu",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+
+const ubuntuMono = localFont({
+  src: "./fonts/UbuntuMono-Regular.woff2", // After converting to woff2
+  variable: "--font-ubuntu-mono",
 });
 
 export const metadata: Metadata = {
-  title: "News Manager",
-  description: "News Manager",
+  title: "YPigeon",
+  description: "YPigeon",
 };
 
 export default function RootLayout({
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+        className={`${ubuntu.variable} ${ubuntuMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <ThemeProvider
           attribute="class"
