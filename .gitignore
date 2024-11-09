@@ -163,3 +163,5 @@ cython_debug/
 # Ignore .DS_Store from Mac
 .DS_Store
 
+# vscode settings, remove .vscode from root and also any internal .vscode folders
+.vscode/
