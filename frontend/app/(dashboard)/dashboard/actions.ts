@@ -37,7 +37,7 @@ export async function getNews(filters: NewsFilters): Promise<NewsListResponse> {
       limit = 20,
       offset = 0,
       query,
-      sort = "published_at",
+      sort = "created_at",
       order = "desc",
       category,
       source,
@@ -47,6 +47,7 @@ export async function getNews(filters: NewsFilters): Promise<NewsListResponse> {
 
     // Apply filters
     if (query) {
+      // Using the new GIN index for headline search
       queryBuilder = queryBuilder.ilike("headline", `%${query}%`);
     }
 
@@ -80,7 +81,7 @@ export async function getNews(filters: NewsFilters): Promise<NewsListResponse> {
   }
 }
 
-export async function getNewsArticle(id: string): Promise<NewsArticle> {
+export async function getNewsArticle(id: bigint): Promise<NewsArticle> {
   try {
     const supabase = await createServerActionClient();
 
@@ -101,42 +102,26 @@ export async function getNewsArticle(id: string): Promise<NewsArticle> {
   }
 }
 
-export async function createNews(
-  news: Omit<NewsArticle, "created_at" | "updated_at">
-): Promise<NewsArticle> {
-  try {
-    const supabase = await createServerActionClient();
-
-    const { data, error } = await supabase
-      .from("news")
-      .insert([news])
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // Revalidate the news list page
-    revalidatePath("/dashboard");
-
-    return data as NewsArticle;
-  } catch (error) {
-    console.error("Error creating news:", error);
-    throw error;
-  }
-}
-
 export async function updateNews(
-  id: string,
+  id: bigint,
   news: Partial<NewsArticle>
 ): Promise<NewsArticle> {
   try {
     const supabase = await createServerActionClient();
 
+    // Remove id, created_at, and updated_at from the update payload
+    /* eslint-disable @typescript-eslint/no-unused-vars */
+    const {
+      id: _id,
+      created_at: _created,
+      updated_at: _updated,
+      ...updateData
+    } = news;
+    /* eslint-enable @typescript-eslint/no-unused-vars */
+
     const { data, error } = await supabase
       .from("news")
-      .update(news)
+      .update(updateData)
       .eq("id", id)
       .select()
       .single();
@@ -152,49 +137,6 @@ export async function updateNews(
     return data as NewsArticle;
   } catch (error) {
     console.error("Error updating news:", error);
-    throw error;
-  }
-}
-
-// export async function deleteNews(id: string): Promise<void> {
-//   try {
-//     const supabase = await createServerActionClient();
-
-//     const { error } = await supabase.from("news").delete().eq("id", id);
-
-//     if (error) {
-//       throw new Error(error.message);
-//     }
-
-//     // Revalidate the news list page
-//     revalidatePath("/dashboard");
-//   } catch (error) {
-//     console.error("Error deleting news:", error);
-//     throw error;
-//   }
-// }
-
-export async function bulkCreateNews(
-  newsList: Omit<NewsArticle, "created_at" | "updated_at">[]
-): Promise<NewsArticle[]> {
-  try {
-    const supabase = await createServerActionClient();
-
-    const { data, error } = await supabase
-      .from("news")
-      .insert(newsList)
-      .select();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    // Revalidate the news list page
-    revalidatePath("/dashboard");
-
-    return data as NewsArticle[];
-  } catch (error) {
-    console.error("Error bulk creating news:", error);
     throw error;
   }
 }

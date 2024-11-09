@@ -1,16 +1,17 @@
 export interface NewsArticle {
-  id: string;
+  id: bigint; // Changed from string to bigint to match BIGINT in SQL
   source_name: string;
   category: string;
   headline: string;
   story: string;
-  published_at: string;
-  image_link: string;
-  source_link: string;
-  meta_description: string;
-  meta_keywords: string;
-  created_at?: string;
-  updated_at?: string;
+  summary: string | null; // Added to match SQL schema
+  bullet_points: string[] | null; // Added to match SQL schema
+  image_link: string | null; // Made nullable to match SQL schema
+  source_link: string; // Unique constraint in SQL
+  meta_description: string | null; // Made nullable to match SQL schema
+  meta_keywords: string | null; // Made nullable to match SQL schema
+  created_at: string; // Made required as it's NOT NULL in SQL
+  updated_at: string; // Added to match SQL schema
 }
 
 export interface NewsFilters {

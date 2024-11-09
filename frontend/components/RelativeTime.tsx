@@ -1,72 +1,113 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 interface RelativeTimeProps {
-  date: string | number | Date;
+  date: string;
+  className?: string;
 }
 
-const RelativeTime: React.FC<RelativeTimeProps> = ({ date }) => {
-  const [relativeTime, setRelativeTime] = useState<string>("");
+const RelativeTime: React.FC<RelativeTimeProps> = ({ date, className }) => {
+  const [timeAgo, setTimeAgo] = useState<string>("");
 
-  function formatRelativeTime(dateInput: string | number | Date): string {
-    const now = new Date().getTime();
-    const past = new Date(dateInput).getTime();
-    const diffInSeconds = Math.floor((now - past) / 1000);
+  const getTimeAgo = (isoString: string): string => {
+    try {
+      // Ensure both dates are in UTC for proper comparison
+      const now = Date.now(); // Current time in milliseconds since epoch UTC
+      const created = new Date(isoString).getTime(); // Convert ISO string to milliseconds UTC
 
-    // Just now - within last minute
-    if (diffInSeconds < 60) {
-      return "just now";
+      // Calculate time difference in milliseconds
+      const diffInMs = Math.abs(now - created); // Using Math.abs to avoid negative values
+      const diffInSeconds = Math.floor(diffInMs / 1000);
+
+      // Less than 30 seconds
+      if (diffInSeconds < 30) {
+        return "just now";
+      }
+
+      // Less than a minute
+      if (diffInSeconds < 60) {
+        return "30s ago";
+      }
+
+      // Less than an hour
+      if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes}m ago`;
+      }
+
+      // Less than a day
+      if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours}h ago`;
+      }
+
+      // Less than a week
+      if (diffInSeconds < 604800) {
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days}d ago`;
+      }
+
+      // Less than a month
+      if (diffInSeconds < 2592000) {
+        const weeks = Math.floor(diffInSeconds / 604800);
+        return `${weeks}w ago`;
+      }
+
+      // Less than a year
+      if (diffInSeconds < 31536000) {
+        const months = Math.floor(diffInSeconds / 2592000);
+        return `${months}mo ago`;
+      }
+
+      // More than a year
+      const years = Math.floor(diffInSeconds / 31536000);
+      return `${years}y ago`;
+    } catch (error) {
+      console.error("Error parsing date:", error);
+      return "Invalid date";
     }
-
-    // Minutes
-    const minutes = Math.floor(diffInSeconds / 60);
-    if (minutes < 60) {
-      return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-    }
-
-    // Hours
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) {
-      return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-    }
-
-    // Days
-    const days = Math.floor(hours / 24);
-    if (days < 30) {
-      return `${days} ${days === 1 ? "day" : "days"} ago`;
-    }
-
-    // Months
-    const months = Math.floor(days / 30);
-    if (months < 12) {
-      return `${months} ${months === 1 ? "month" : "months"} ago`;
-    }
-
-    // Years
-    const years = Math.floor(months / 12);
-    return `${years} ${years === 1 ? "year" : "years"} ago`;
-  }
+  };
 
   useEffect(() => {
-    // Set initial value
-    setRelativeTime(formatRelativeTime(date));
+    const updateTime = () => {
+      setTimeAgo(getTimeAgo(date));
+    };
 
-    // Update the relative time every minute
+    // Initial update
+    updateTime();
+
+    // Update interval
     const intervalId = setInterval(() => {
-      setRelativeTime(formatRelativeTime(date));
-    }, 60000); // Update every minute
+      updateTime();
+    }, 30000); // Update every 30 seconds
 
     return () => clearInterval(intervalId);
   }, [date]);
 
-  // Add a tooltip with the actual date
-  const fullDate = new Date(date).toLocaleString();
+  // Format the full date for the tooltip
+  const formatFullDate = (isoString: string): string => {
+    try {
+      const date = new Date(isoString);
+      return new Intl.DateTimeFormat(undefined, {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short",
+      }).format(date);
+    } catch {
+      return "Invalid date";
+    }
+  };
 
   return (
-    <span className="relative group cursor-help">
-      <span>{relativeTime}</span>
-      <span className="invisible group-hover:visible absolute -top-8 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-xs rounded whitespace-nowrap">
-        {fullDate}
-      </span>
+    <span
+      className={`text-sm ${className || ""}`}
+      title={formatFullDate(date)}
+      data-testid="relative-time"
+    >
+      {timeAgo}
     </span>
   );
 };

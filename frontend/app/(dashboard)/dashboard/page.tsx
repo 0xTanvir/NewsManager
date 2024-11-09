@@ -1,59 +1,28 @@
+// page.tsx
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  FileText,
-  Zap,
-  Languages,
-} from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { toast } from "sonner";
 import { type NewsArticle } from "@/types/news";
 import { getNews } from "./actions";
-import RelativeTime from "@/components/RelativeTime";
+import { NewsTable } from "./NewsTable";
+import { ArticleSummarySheet } from "./ArticleSummarySheet";
+import { Pagination } from "./Pagination";
+import { SearchFilters } from "./SearchFilters";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
-export default function DashboardPage() {
+const ITEMS_PER_PAGE = 20;
+
+// Create a component for the main dashboard content
+function DashboardContent() {
+  // State management
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortColumn, setSortColumn] =
-    useState<keyof NewsArticle>("published_at");
+  const [sortColumn, setSortColumn] = useState<keyof NewsArticle>("created_at");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const [selectedCategory, setSelectedCategory] =
     useState<string>("Categories");
@@ -63,20 +32,16 @@ export default function DashboardPage() {
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(
     null
   );
+  const [error, setError] = useState<string | null>(null);
 
-  const itemsPerPage = 20;
-
-  const handleShowSummary = (article: NewsArticle) => {
-    setSelectedArticle(article);
-    setIsSummaryOpen(true);
-  };
-
+  // Data fetching
   const fetchNews = useCallback(async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const response = await getNews({
-        limit: itemsPerPage,
-        offset: (currentPage - 1) * itemsPerPage,
+        limit: ITEMS_PER_PAGE,
+        offset: (currentPage - 1) * ITEMS_PER_PAGE,
         query: searchTerm,
         sort: sortColumn,
         order: sortDirection,
@@ -86,9 +51,12 @@ export default function DashboardPage() {
       setNewsArticles(response.data);
       setTotalCount(response.count);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to fetch news articles"
-      );
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch news articles";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -105,15 +73,11 @@ export default function DashboardPage() {
     fetchNews();
   }, [fetchNews]);
 
-  // Debounced search
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setCurrentPage(1); // Reset to first page when search changes
-      fetchNews();
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, fetchNews]);
+  // Event handlers
+  const handleShowSummary = (article: NewsArticle) => {
+    setSelectedArticle(article);
+    setIsSummaryOpen(true);
+  };
 
   const handleSort = (column: keyof NewsArticle) => {
     if (column === sortColumn) {
@@ -124,346 +88,100 @@ export default function DashboardPage() {
     }
   };
 
-  // const handleDelete = async (id: string) => {
-  //   if (!window.confirm("Are you sure you want to delete this article?")) {
-  //     return;
-  //   }
-
-  //   try {
-  //     await deleteNews(id);
-  //     toast.success("News article deleted successfully");
-  //     fetchNews();
-  //   } catch (error) {
-  //     console.error(error);
-  //     toast.error(
-  //       error instanceof Error ? error.message : "Failed to delete news article"
-  //     );
-  //   }
-  // };
-
-  const handleOptimize = async (id: string) => {
-    toast("Optimize functionality not implemented yet:" + id);
+  const handleOptimize = async (id: bigint) => {
+    toast("Optimize functionality not implemented yet:" + id.toString());
   };
 
-  const handleTranslate = async (id: string) => {
-    toast("Translation functionality not implemented yet:" + id);
+  const handleTranslate = async (id: bigint) => {
+    toast("Translation functionality not implemented yet:" + id.toString());
   };
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
-  // The rest of your JSX remains largely the same, just handle loading state
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    setCurrentPage(1);
+  };
+
+  const handleSourceChange = (value: string) => {
+    setSelectedSource(value);
+    setCurrentPage(1);
+  };
+
+  // Get unique categories and sources for filters
+  const categories = [
+    "Categories",
+    ...new Set(newsArticles.map((article) => article.category)),
+  ];
+  const sources = [
+    "Sources",
+    ...new Set(newsArticles.map((article) => article.source_name)),
+  ];
+
+  return (
+    <>
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <SearchFilters
+        categories={categories}
+        sources={sources}
+        onSearchChange={handleSearchChange}
+        onCategoryChange={handleCategoryChange}
+        onSourceChange={handleSourceChange}
+      />
+
+      <NewsTable
+        newsArticles={newsArticles}
+        isLoading={isLoading}
+        sortColumn={sortColumn}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        onShowSummary={handleShowSummary}
+        onOptimize={handleOptimize}
+        onTranslate={handleTranslate}
+      />
+
+      {selectedArticle && (
+        <ArticleSummarySheet
+          article={selectedArticle}
+          open={isSummaryOpen}
+          onOpenChange={setIsSummaryOpen}
+        />
+      )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalCount={totalCount}
+        pageSize={ITEMS_PER_PAGE}
+        isLoading={isLoading}
+        onPageChange={handlePageChange}
+      />
+    </>
+  );
+}
+
+// Main Dashboard Page component wrapped with ErrorBoundary
+export default function DashboardPage() {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      <div className="mb-6 flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-grow">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search news articles..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              "Categories",
-              ...new Set(newsArticles.map((article) => article.category)),
-            ].map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedSource} onValueChange={setSelectedSource}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select source" />
-          </SelectTrigger>
-          <SelectContent>
-            {[
-              "Sources",
-              ...new Set(newsArticles.map((article) => article.source_name)),
-            ].map((source) => (
-              <SelectItem key={source} value={source}>
-                {source}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
-      {/* Table component remains the same except for the loading state */}
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px] text-center">Image</TableHead>
-              <TableHead
-                className="cursor-pointer text-center"
-                onClick={() => handleSort("headline")}
-              >
-                Headline{" "}
-                {sortColumn === "headline" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer text-center"
-                onClick={() => handleSort("category")}
-              >
-                Category{" "}
-                {sortColumn === "category" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer text-center"
-                onClick={() => handleSort("source_name")}
-              >
-                Source{" "}
-                {sortColumn === "source_name" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead
-                className="cursor-pointer text-center"
-                onClick={() => handleSort("published_at")}
-              >
-                Posted At{" "}
-                {sortColumn === "published_at" &&
-                  (sortDirection === "asc" ? "↑" : "↓")}
-              </TableHead>
-              <TableHead className="text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : newsArticles.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  No news articles found
-                </TableCell>
-              </TableRow>
-            ) : (
-              newsArticles.map((article) => (
-                <TableRow key={article.id}>
-                  <TableCell>
-                    <img
-                      src={article.image_link}
-                      alt={article.headline}
-                      className="w-20 h-20 object-cover rounded"
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    <div className="flex flex-col gap-2">
-                      <span>{article.headline}</span>
-                    </div>
-                  </TableCell>
-
-                  <TableCell>{article.category}</TableCell>
-                  <TableCell>{article.source_name}</TableCell>
-                  <TableCell>
-                    <RelativeTime date={article.published_at} />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleShowSummary(article)}
-                            >
-                              <FileText className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Summary</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleOptimize(article.id)}
-                            >
-                              <Zap className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Optimize</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleTranslate(article.id)}
-                            >
-                              <Languages className="h-4 w-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Translate</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Summary Drawer */}
-      <Sheet open={isSummaryOpen} onOpenChange={setIsSummaryOpen}>
-        <SheetContent
-          side="right"
-          className="w-full sm:max-w-xl md:max-w-2xl lg:max-w-4xl overflow-y-auto"
-        >
-          <SheetHeader className="mb-6">
-            <SheetTitle>Article Summary</SheetTitle>
-            <SheetDescription>
-              Quick overview and key points of the article
-            </SheetDescription>
-          </SheetHeader>
-
-          {selectedArticle && (
-            <div className="space-y-6">
-              {/* Article Image */}
-              <Card>
-                <CardContent className="p-0">
-                  <AspectRatio ratio={16 / 9}>
-                    <img
-                      src={selectedArticle.image_link}
-                      alt={selectedArticle.headline}
-                      className="object-cover w-full h-full rounded-t-lg"
-                    />
-                  </AspectRatio>
-                  <div className="p-4">
-                    <h3 className="font-semibold mb-2">
-                      {selectedArticle.headline}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedArticle.meta_description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Article Details */}
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
-                  Source & Date
-                </Label>
-                <p className="text-sm">
-                  {selectedArticle.source_name} •{" "}
-                  <RelativeTime date={selectedArticle.published_at} />
-                </p>
-              </div>
-
-              {/* Summary Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedArticle.story}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* Bullet Points Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Key Points</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                    <li>
-                      This article can attract attention due to its coverage of{" "}
-                      {selectedArticle.category}
-                    </li>
-                    <li>
-                      The story is timely and relevant to current events in{" "}
-                      {selectedArticle.category}
-                    </li>
-                    <li>
-                      It provides valuable insights into{" "}
-                      {selectedArticle.headline.toLowerCase()}
-                    </li>
-                    <li>
-                      The coverage includes perspectives from{" "}
-                      {selectedArticle.source_name}
-                    </li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              {/* Metadata */}
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
-                  Category
-                </Label>
-                <p className="text-sm">{selectedArticle.category}</p>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-sm text-muted-foreground">
-                  Keywords
-                </Label>
-                <p className="text-sm">
-                  {selectedArticle.meta_keywords || "No keywords available"}
-                </p>
-              </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
-
-      {/* Pagination section updated with total count from API */}
-      <div className="flex justify-between items-center mt-4">
-        <div>
-          Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-          {Math.min(currentPage * itemsPerPage, totalCount)} of {totalCount}{" "}
-          articles
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1 || isLoading}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages || isLoading}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <ErrorBoundary>
+        <DashboardContent />
+      </ErrorBoundary>
     </div>
   );
 }
