@@ -4,7 +4,6 @@ import (
 	"log/slog"
 
 	"ncrawler/internal/crawler"
-	"ncrawler/internal/sources/aljazeera"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +17,7 @@ var syncCmd = &cobra.Command{
 		crawler := crawler.GetCrawler()
 
 		slog.Info("Starting news crawler")
-		if err := crawler.Sync(aljazeera.GetScraper()); err != nil {
+		if err := crawler.Sync(); err != nil {
 			slog.Error("Error at starting news crawler", "cause", err)
 		}
 	},

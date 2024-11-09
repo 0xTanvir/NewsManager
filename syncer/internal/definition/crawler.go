@@ -9,12 +9,14 @@ type Downloader interface {
 }
 
 type Source interface {
+	// GetNewLatestLinks() ([]string, error)
 	GetLatest() ([]dto.News, error)
+	// GetName() string
 
 	// Downloader implements the downloader for the store
 	Downloader
 }
 
 type Crawler interface {
-	Sync(source Source) error
+	Sync() error
 }

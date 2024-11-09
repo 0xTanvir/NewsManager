@@ -10,4 +10,5 @@ type DBConfig struct {
 	Password string
 	Address  string
 	Database string
+	SSLMode  string
 }
