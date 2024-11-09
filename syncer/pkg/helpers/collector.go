@@ -13,7 +13,7 @@ func GetCollector() *colly.Collector {
 	c.Limit(&colly.LimitRule{
 		DomainGlob:  "*",
 		RandomDelay: 5 * time.Second, // Random delay of up to 5 seconds between requests
-		Parallelism: 2,               // Ensure only 2 request is processed at a time
+		Parallelism: 1,               // Ensure only 2 request is processed at a time
 	})
 
 	return c

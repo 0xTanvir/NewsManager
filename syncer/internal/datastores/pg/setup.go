@@ -38,8 +38,14 @@ func getInstance(config *dto.DBConfig) *pgxpool.Pool {
 		err    error
 	)
 
-	// urlExample := "postgres://username:password@localhost:5432/database_name"
-	url := fmt.Sprintf("postgres://%s:%s@%s/%s", config.User, config.Password, config.Address, config.Database)
+	// Modified connection string to include SSL mode
+	url := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s",
+		config.User,
+		config.Password,
+		config.Address,
+		config.Database,
+		config.SSLMode,
+	)
 
 	dbpool, err = pgxpool.New(context.Background(), url)
 	if err != nil {
