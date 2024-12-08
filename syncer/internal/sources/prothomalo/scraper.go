@@ -12,7 +12,7 @@ import (
 type scraper struct {
 }
 
-func (s *scraper) GetLatest() ([]dto.News, error) {
+func (s *scraper) GetLatest() (dto.NewsList, error) {
 	var (
 		c           *colly.Collector
 		newsStories []dto.News

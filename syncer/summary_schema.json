@@ -1,0 +1,50 @@
+{
+    "name": "article_summary",
+    "strict": false,
+    "schema": {
+        "type": "object",
+        "required": [
+            "metadata",
+            "summary",
+            "key_points"
+        ],
+        "properties": {
+            "metadata": {
+                "type": "object",
+                "required": [
+                    "source",
+                    "categories",
+                    "verificationStatus"
+                ],
+                "properties": {
+                    "source": {
+                        "type": "string"
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "verificationStatus": {
+                        "type": "string",
+                        "enum": [
+                            "VERIFIED",
+                            "UNVERIFIED",
+                            "PENDING"
+                        ]
+                    }
+                }
+            },
+            "summary": {
+                "type": "string"
+            },
+            "key_points": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

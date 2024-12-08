@@ -29,7 +29,7 @@ func (s *newsStore) DetectNewLinks(foundedLinks []string) ([]string, error) {
 	// Build the query using plain SQL instead of prepared statement
 	valueStrings := make([]string, 0, len(foundedLinks))
 	valueArgs := make([]interface{}, 0, len(foundedLinks))
-	
+
 	for i, link := range foundedLinks {
 		valueStrings = append(valueStrings, fmt.Sprintf("$%d", i+1))
 		valueArgs = append(valueArgs, link)
@@ -77,14 +77,20 @@ func (s *newsStore) AddNewsStories(newsStories []dto.News) error {
 	return WrapInTx(context.Background(), s.dbPool, func(tx pgx.Tx) error {
 		// Create values string for bulk insert
 		valueStrings := make([]string, 0, len(newsStories))
-		valueArgs := make([]interface{}, 0, len(newsStories)*8)
-		
+		valueArgs := make([]interface{}, 0, len(newsStories)*10)
+
 		for i, news := range newsStories {
-			base := i * 8
-			valueStrings = append(valueStrings, 
-				fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
-					base+1, base+2, base+3, base+4, base+5, base+6, base+7, base+8))
-			
+			base := i * 10
+			valueStrings = append(valueStrings,
+				fmt.Sprintf("($%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d, $%d)",
+					base+1, base+2, base+3, base+4, base+5, base+6, base+7, base+8, base+9, base+10))
+
+			// Convert BulletPoints to a proper PostgreSQL array if it's nil
+			bulletPoints := news.BulletPoints
+			if bulletPoints == nil {
+				bulletPoints = []string{} // Convert nil to empty array for PostgreSQL
+			}
+
 			valueArgs = append(valueArgs,
 				news.SourceName,
 				news.Category,
@@ -93,6 +99,8 @@ func (s *newsStore) AddNewsStories(newsStories []dto.News) error {
 				news.ImageLink,
 				news.SourceLink,
 				news.MetaDescription,
+				news.Summary,
+				bulletPoints, // pgx will automatically handle the array conversion
 				news.MetaKeywords,
 			)
 		}
@@ -105,7 +113,9 @@ func (s *newsStore) AddNewsStories(newsStories []dto.News) error {
 				story,
 				image_link, 
 				source_link, 
-				meta_description, 
+				meta_description,
+				summary,
+				bullet_points,
 				meta_keywords
 			) VALUES %s`,
 			strings.Join(valueStrings, ","))

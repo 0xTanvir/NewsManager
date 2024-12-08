@@ -15,7 +15,7 @@ import (
 type scraper struct {
 }
 
-func (s *scraper) GetLatest() ([]dto.News, error) {
+func (s *scraper) GetLatest() (dto.NewsList, error) {
 	nLinks, err := s.getLatestNewsLink()
 	if err != nil {
 		return nil, err

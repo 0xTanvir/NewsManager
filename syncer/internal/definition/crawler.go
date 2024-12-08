@@ -10,7 +10,7 @@ type Downloader interface {
 
 type Source interface {
 	// GetNewLatestLinks() ([]string, error)
-	GetLatest() ([]dto.News, error)
+	GetLatest() (dto.NewsList, error)
 	// GetName() string
 
 	// Downloader implements the downloader for the store
